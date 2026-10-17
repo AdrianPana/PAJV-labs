@@ -13,21 +13,22 @@ public class GhostCarPlayer : MonoBehaviour
     {
         carController = GetComponent<CarController>();
         startTime = Time.time;
+        Debug.Log($"Starting replay with {replayCommands.Count} commands.");
     }
 
     private void FixedUpdate()
     {
+        Debug.Log($"Current index: {currentIndex}, Total commands: {replayCommands.Count}");
+
         if (currentIndex >= replayCommands.Count)
             return;
 
         float elapsedTime = Time.time - startTime;
-        ICommand command = replayCommands[currentIndex];
-
-        if (elapsedTime >= command.Timestamp)
+        while (currentIndex < replayCommands.Count &&
+           elapsedTime >= replayCommands[currentIndex].Timestamp)
         {
-            command.Execute(carController);
+            replayCommands[currentIndex].Execute(carController);
             currentIndex++;
         }
-
     }
 }

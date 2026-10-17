@@ -1,9 +1,17 @@
 using System.Collections.Generic;
-using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerInputRecorder : MonoBehaviour
 {
+    public enum InputScheme
+    {
+        KeyboardMouse,
+        Gamepad
+    }
+
+    public InputScheme inputScheme = InputScheme.KeyboardMouse;
+
     private CarController carController;
 
     private List<ICommand> recorded = new List<ICommand>();
@@ -14,6 +22,10 @@ public class PlayerInputRecorder : MonoBehaviour
     private void Awake()
     {
         playerInputActions = new InputSystem_Actions();
+        if (inputScheme == InputScheme.Gamepad)
+            playerInputActions.bindingMask = InputBinding.MaskByGroup("Gamepad");
+        else
+            playerInputActions.bindingMask = InputBinding.MaskByGroup("Keyboard&Mouse");
     }
 
     private void OnEnable()
@@ -32,7 +44,7 @@ public class PlayerInputRecorder : MonoBehaviour
         recordingStartTime = Time.time;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         float currentTime = Time.time - recordingStartTime;
 
