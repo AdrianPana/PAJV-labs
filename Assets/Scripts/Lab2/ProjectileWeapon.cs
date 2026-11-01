@@ -1,62 +1,66 @@
 using UnityEngine;
 using UnityEngine.Pool;
-
-public class ProjectileWeapon : MonoBehaviour
+namespace Lab2
 {
-    [SerializeField] private Projectile projectilePrefab;
-    [SerializeField] private float fireRate = 10f;
-    private float fireCooldown = 0f;
-
-    private ObjectPool<Projectile> projectilePool;
-
-    private void Awake()
+    public class ProjectileWeapon : MonoBehaviour
     {
-        projectilePool = new ObjectPool<Projectile>(
-            createFunc: () => Instantiate(projectilePrefab),
-            actionOnGet: (projectile) => projectile.gameObject.SetActive(true),
-            actionOnRelease: (projectile) => projectile.gameObject.SetActive(false),
-            actionOnDestroy: (projectile) => Destroy(projectile.gameObject),
-            collectionCheck: true,
-            defaultCapacity: 10,
-            maxSize: 20
-        );
-    }
+        [SerializeField] private Projectile projectilePrefab;
+        [SerializeField] private float fireRate = 10f;
+        private float fireCooldown = 0f;
 
-    public void Fire(Vector3 direction)
-    {
-        Projectile projectile = projectilePool.Get();
-        projectile.Launch(transform.position, direction, projectilePool);
-    }
+        private ObjectPool<Projectile> projectilePool;
 
-    private void Update()
-    {
-        fireCooldown -= Time.deltaTime;
-        if (fireCooldown <= 0f)
+        private void Awake()
         {
-            var closestEnemy = FindClosestEnemy();
-            if (closestEnemy.HasValue && closestEnemy.Value.magnitude <= 5.0f)
+            projectilePool = new ObjectPool<Projectile>(
+                createFunc: () => Instantiate(projectilePrefab),
+                actionOnGet: (projectile) => projectile.gameObject.SetActive(true),
+                actionOnRelease: (projectile) => projectile.gameObject.SetActive(false),
+                actionOnDestroy: (projectile) => Destroy(projectile.gameObject),
+                collectionCheck: true,
+                defaultCapacity: 10,
+                maxSize: 20
+            );
+        }
+
+        public void Fire(Vector3 direction)
+        {
+            Projectile projectile = projectilePool.Get();
+            Debug.Log("Firing projectile from position: " + transform.position + " in direction: " + direction);
+            projectile.Launch(transform.position, direction, projectilePool);
+        }
+
+        private void Update()
+        {
+            fireCooldown -= Time.deltaTime;
+            if (fireCooldown <= 0f)
             {
-                Vector3 directionToEnemy = (closestEnemy.Value - transform.position).normalized;
-                Fire(directionToEnemy);
-                fireCooldown = fireRate;
+                var closestEnemy = FindClosestEnemy();
+                if (closestEnemy.HasValue && closestEnemy.Value.magnitude <= 5.0f)
+                {
+                    Vector3 directionToEnemy = (closestEnemy.Value - transform.position).normalized;
+                    Fire(directionToEnemy);
+                    fireCooldown = fireRate;
+                }
             }
         }
-    }
 
-    private Vector3? FindClosestEnemy()
-    {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        GameObject closestEnemy = null;
-        float closestDistance = Mathf.Infinity;
-        foreach (GameObject enemy in enemies)
+        private Vector3? FindClosestEnemy()
         {
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);
-            if (distance < closestDistance)
+            Debug.Log("Finding closest enemy...");
+            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            GameObject closestEnemy = null;
+            float closestDistance = Mathf.Infinity;
+            foreach (GameObject enemy in enemies)
             {
-                closestDistance = distance;
-                closestEnemy = enemy;
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestEnemy = enemy;
+                }
             }
+            return closestEnemy != null ? closestEnemy.transform.position : null;
         }
-        return closestEnemy != null ? closestEnemy.transform.position : null;
     }
 }

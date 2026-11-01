@@ -7,6 +7,7 @@ namespace Lab2
     {
         [SerializeField] private PlayerEventSO playerEventSO;
         public int health = 100;
+        public int xp = 0;
 
         private void Start()
         {
@@ -30,11 +31,17 @@ namespace Lab2
             playerEventSO.NotifyPlayerHealthChanged(health);
         }
 
-        private void OnTriggerEnter(Collider other)
+        public void AddXP(int amount)
         {
-            if (other.CompareTag("Enemy"))
+            xp += amount;
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (other.CompareTag("XP"))
             {
-                TakeDamage(1);
+                AddXP(1);
+                Destroy(other.gameObject);
             }
         }
     }

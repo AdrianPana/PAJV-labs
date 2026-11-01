@@ -1,40 +1,75 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class Enemy : MonoBehaviour
+namespace Lab2
 {
-    private float moveSpeed;
-    private int hp;
-    private Transform playerTransform;
-    private IObjectPool<Enemy> pool;
-    private bool released;
-
-    public void Initialize(EnemyData data, Transform player, IObjectPool<Enemy> ownerPool)
+    public class Enemy : MonoBehaviour
     {
-        moveSpeed = data.moveSpeed;
-        hp = data.maxHP;
-        playerTransform = player;
-        pool = ownerPool;
-        released = false;
-    }
+        [SerializeField] private GameObject XpPrefab;
 
-    private void Update()
-    {
-        if (playerTransform == null) return;
+        private float moveSpeed;
+        private int hp;
+        private Transform playerTransform;
+        private IObjectPool<Enemy> pool;
+        private bool released;
 
-        Vector3 direction = (playerTransform.position - transform.position).normalized;
-        transform.position += direction * moveSpeed * Time.deltaTime;
-    }
+        private float attackCooldown;
+        private float attackTimer = 0f;
 
-    public void TakeDamage(int damage)
-    {
-        if (released) return;
-
-        hp -= damage;
-        if (hp <= 0)
+        public void Initialize(EnemyData data, Transform player, IObjectPool<Enemy> ownerPool)
         {
-            released = true;
-            pool.Release(this);
+            moveSpeed = data.moveSpeed;
+            hp = data.maxHP;
+            playerTransform = player;
+            pool = ownerPool;
+            released = false;
+            attackCooldown = data.attackCooldown;
+            attackTimer = 0f;
+        }
+
+        private void Update()
+        {
+            if (playerTransform == null) return;
+
+            Vector3 direction = (playerTransform.position - transform.position).normalized;
+            transform.position += direction * moveSpeed * Time.deltaTime;
+
+            attackTimer -= Time.deltaTime;
+        }
+
+        public void TakeDamage(int damage)
+        {
+            if (released) return;
+
+            hp -= damage;
+            if (hp <= 0)
+            {
+                released = true;
+                pool.Release(this);
+                if (XpPrefab != null)
+                {
+                    Instantiate(XpPrefab, transform.position, Quaternion.identity);
+                }
+            }
+        }
+
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            TryAttack(collision);
+        }
+
+        private void OnTriggerStay2D(Collider2D collision)
+        {
+            TryAttack(collision);
+        }
+
+        private void TryAttack(Collider2D collision)
+        {
+            if (collision.CompareTag("Player") && attackTimer <= 0)
+            {
+                collision.GetComponent<Player>().TakeDamage(1);
+                attackTimer = attackCooldown;
+            }
         }
     }
 }
