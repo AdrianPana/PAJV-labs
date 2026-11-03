@@ -6,10 +6,14 @@ namespace Lab2
 
     public class Projectile : MonoBehaviour
     {
+        [SerializeField] private bool pierces;
+
         private IObjectPool<Projectile> pool;
         private Vector3 direction;
         private float lifetime = 5f;
         private float timer = 0f;
+
+        public int damage = 1;
 
         public void Launch(Vector3 position, Vector3 direction, IObjectPool<Projectile> ownerPool)
         {
@@ -21,9 +25,7 @@ namespace Lab2
 
         private void Update()
         {
-            Debug.Log(transform.position);
-            transform.position += direction * Time.deltaTime * 10f;
-            Debug.Log(transform.position);
+            transform.position += direction * Time.deltaTime * 8f;
 
             timer += Time.deltaTime;
             if (timer >= lifetime)
@@ -36,8 +38,9 @@ namespace Lab2
         {
             if (other.CompareTag("Enemy"))
             {
-                other.gameObject.GetComponent<Enemy>().TakeDamage(1);
-                pool.Release(this);
+                other.gameObject.GetComponent<Enemy>().TakeDamage(damage);
+                if (!pierces)
+                    pool.Release(this);
             }
         }
     }

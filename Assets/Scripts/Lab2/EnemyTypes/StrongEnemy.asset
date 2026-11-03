@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d14852b4748a8ce4cb485f5901d86ad0, type: 3}
-  m_Name: BaseEnemy
+  m_Name: StrongEnemy
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  prefab: {fileID: 0}
-  moveSpeed: 3
-  maxHP: 1
-  attackCooldown: 0.5
+  prefab: {fileID: 303178034689314075, guid: b2c9ac9d0d516174b9a540137a44439f, type: 3}
+  moveSpeed: 0.6
+  maxHP: 3
+  attackCooldown: 0.25
+  image: {fileID: 21300000, guid: 5f8ed05d6a67b384088d08f6d8d57533, type: 3}

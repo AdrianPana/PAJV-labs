@@ -19,12 +19,13 @@ namespace Lab2
         public void Initialize(EnemyData data, Transform player, IObjectPool<Enemy> ownerPool)
         {
             moveSpeed = data.moveSpeed;
-            hp = data.maxHP;
+            hp = data.maxHP + LevelManager.Instance.enemyHealthBonus;
             playerTransform = player;
             pool = ownerPool;
             released = false;
             attackCooldown = data.attackCooldown;
             attackTimer = 0f;
+            GetComponent<SpriteRenderer>().sprite = data.image;
         }
 
         private void Update()

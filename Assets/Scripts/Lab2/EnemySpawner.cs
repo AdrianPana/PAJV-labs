@@ -5,13 +5,9 @@ namespace Lab2
 {
     public class EnemySpawner : MonoBehaviour
     {
-        [SerializeField] private Enemy enemyPrefab;
         [SerializeField] private EnemyData[] enemyTypes;
         [SerializeField] private Transform player;
-
-        [SerializeField] private float spawnInterval = 3f;
-        [SerializeField] private float minSpawnDistance = 10f;
-        [SerializeField] private float maxSpawnDistance = 14f;
+        [SerializeField] private EnemyFactory enemyFactory;
 
         private ObjectPool<Enemy> enemyPool;
         private float spawnTimer;
@@ -19,7 +15,7 @@ namespace Lab2
         private void Awake()
         {
             enemyPool = new ObjectPool<Enemy>(
-                createFunc: () => Instantiate(enemyPrefab),
+                createFunc: () => Spawn(),
                 actionOnGet: enemy => enemy.gameObject.SetActive(true),
                 actionOnRelease: enemy => enemy.gameObject.SetActive(false),
                 actionOnDestroy: enemy => Destroy(enemy.gameObject),
@@ -37,22 +33,14 @@ namespace Lab2
             if (spawnTimer <= 0f)
             {
                 Spawn();
-                spawnTimer = spawnInterval;
+                spawnTimer = LevelManager.Instance.currentEnemySpawnInterval;
             }
         }
 
-        private void Spawn()
+        private Enemy Spawn()
         {
-            EnemyData data = enemyTypes[Random.Range(0, enemyTypes.Length)];
-
-            Vector2 direction = Random.insideUnitCircle.normalized;
-            float distance = Random.Range(minSpawnDistance, maxSpawnDistance);
-            Vector3 spawnPos = player.position + (Vector3)(direction * distance);
-            spawnPos.z = 0f;
-
-            Enemy enemy = enemyPool.Get();
-            enemy.transform.position = spawnPos;
-            enemy.Initialize(data, player, enemyPool);
+            EnemyData data = enemyTypes[Random.Range(0, LevelManager.Instance.enemyTypes)];
+            return enemyFactory.Create(data, player, enemyPool);
         }
     }
 }
